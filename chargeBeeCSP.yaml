@@ -1,0 +1,535 @@
+openapi: 3.0.0
+servers:
+  - url: https://web.wiise.live
+    description: Default server
+  - url: https://api.wiise.live
+    description: Default server
+  - url: https://api.wiise.com
+    description: Default server
+  - url: http://api.weatherapi.com/v1
+    description: Default server
+  - url: https://au-saz-wiiselive-api-appservice.azurewebsites.net
+    description: temp server
+  - url: http://localhost:7071
+    description: temp server
+  - url: http://api-slot3.wiise.live
+    description: temp server
+  # To add another server
+  # - url: https://petstore.swagger.io/sandbox
+  #   description: Sandbox server
+info:
+  title: ChargeBee Integration with CSP
+  version: 1.0.0
+  description: >
+    # Introduction
+
+    Petstore illustrate the typical design decisions and tradeoffs a developer makes when building an enterprise application. 
+    The demo shows how to document REST API services **OpenAPI format** and is based on
+    [Petstore sample](http://petstore.swagger.io/) by [swagger.io](http://swagger.io) team.
+    It was further **extended** by [ReDoc](https://github.com/Redocly/redoc) Team.
+
+    ## Webhook Categories
+
+    The Webhook are divided in 3 separate categories, to make things easy to discover. 
+
+    Below is how these APIs are arranged
+
+      - Subscription Created
+      - Subscription Changed
+      - Subscription Cancel
+
+    ## API Operations
+      
+    Below is the list of supported operations
+
+      - Update an existing pet
+      - Add a new pet to the store
+      - Find Pet by ID
+      - Updates a pet in the store
+      - Deletes a pet
+      - Upload an pet image
+      - Finds Pets by status
+      - Finds Pets by tags
+
+    ### Store Operations
+
+    Below is the list of supported operations
+
+      - Get pet inventory by status
+      - Place an order for a pet
+      - Find purchase order by ID
+      - Delete purchase order
+
+    ### User Operations
+
+    Below is the list of supported operations
+
+      - Create User
+      - Login and Logout of user
+      - Get user by user name
+      - Update user
+      - Delete user
+
+    # Example
+
+    Below is a small code sample how to sender this OpenAPI spec using RapiDoc
+
+    ```html
+      <!doctype html> <!-- Important: must specify -->
+      <html>
+      <head>
+        <meta charset="utf-8"> <!-- Important: rapi-doc uses utf8 characters -->
+        <script type="module" src="https://unpkg.com/rapidoc/dist/rapidoc-min.js"></script>
+      </head>
+      <body>
+        <rapi-doc 
+          spec-url = "https://petstore.swagger.io/v2/swagger.json" 
+        > </rapi-doc>
+      </body> 
+      </html>
+    ```
+
+    # OpenAPI Version
+
+    You can find the version of OpenAPI spec from the `version` object
+
+    ```yaml
+      openapi: 3.0.2
+      info:
+        version: '1.0'
+        title: Server Variables
+      ...  
+    ```
+
+    # Authentication
+
+    Petstore offers two forms of authentication:
+      
+      - API Key
+      - OAuth2
+
+    OAuth2 - an open protocol to allow secure authorization in a simple
+    and standard method from web, mobile and desktop applications.
+externalDocs:
+  description: Find out how to create Github repo for your OpenAPI spec.
+  url: "https://github.com/Rebilly/generator-openapi-repo"
+tags:
+  - name: ChargeBee Webhook
+    description: Operations to trigger on event execution of Subscription
+
+paths:
+  "/SubscriptionCreated":
+    parameters:
+      - name: code
+        description: API-Key from Azure app service
+        in: query
+        value: ""
+        schema:
+          type: string
+    post:
+      tags:
+        - ChargeBee Webhook
+      summary: Adds a new subscription licence to CSP
+      description: Creates a new customer in CSP if not exists and adds the subscription if not exists in CSP.
+      operationId: addPet
+      responses:
+        "200":
+          description: Success
+        "401":
+          description: Unauthorized acess
+      x-code-samples:
+        - lang: "HTTP"
+          label: "HTTP Request"
+          source: |
+            POST /SubscritionCreated HTTP/1.1
+            Host: https://web.wiise.live/SubscriptionCreated
+            Content-Type: application/json; charset=utf-8
+            Content-Length: 137
+
+            {
+              "status": "ok",
+              "extended": true,
+              "results": [
+                {"value": 0, "type": "int64"},
+                {"value": 1.0e+3, "type": "decimal"}
+              ]
+            }
+        - lang: .Net
+          label: ".Net"
+          source: |
+            private String createPet() throws JsonProcessingException {
+              Pet pet = new Pet();
+              pet.setId(1l);
+              pet.setName("Wuffy");
+              Category category = new Category(1l, "Hund");
+              pet.setCategory(category);
+              return new ObjectMapper().writeValueAsString(pet);
+            }
+      requestBody:
+        $ref: "#/components/requestBodies/SubscrptionCreate"
+  "/RegisterWiise":
+    $ref: "./productApi.yaml#/paths"
+  "/current.json":
+    parameters:
+      - name: key
+        description: API-Key from Azure app service
+        in: query
+        value: ""
+        schema:
+          type: string
+      - name: q
+        description: Location
+        in: query
+        value: ""
+        schema:
+          type: string
+    post:
+      tags:
+        - ChargeBee Webhook
+      summary: Adds a new subscription licence to CSP
+      description: Creates a new customer in CSP if not exists and adds the subscription if not exists in CSP.
+      operationId: addPet
+      responses:
+        "200":
+          description: Success
+        "401":
+          description: Unauthorized acess
+  "/CheckRapidoc":
+    post:
+      tags:
+        - ChargeBee Webhook
+    responses:
+      "200":
+        description: Success
+      "401":
+        description: Unauthorized acess
+components:
+  schemas:
+    SubscriptionItem:
+      description: Item existing in ChargeBee Subscription.
+      type: object
+      properties:
+        item_price_id:
+          type: string
+          description: The unique identifier of the item price (Maximum 100 chars)
+          example: 794828BF-8343-4B15-9F49-0EB87711A6A3
+        item_type:
+          type: string
+          enum:
+            - plan
+            - addon
+            - charge
+          description: The type of item. There must be one and only one item of type plan in this list.
+          example: plan
+        quantity:
+          type: int
+          description: The quantity of the item purchased (Min = 1)
+          example: 1
+        unit_price:
+          type: in cents
+          description: The price/per unit price of the item. When not provided, the value set for the item price is used. (in cents min = 0)
+          example: 11900
+        amount:
+          type: in cents
+          description: The total amount for the item as determined from unit_price, free_quantity, quantity and item_tiers as applicable. The value depends on the type of currency.
+          example: 11900
+        free_quantity:
+          type: int
+          description: The free_quantity of the plan-item as specified for the item price.(Min 0)
+          example: 0
+        object:
+          type: string
+          description: Elelment it is part of.
+          example: "subscription_item"
+      required: item_price_id
+    Subscription:
+      description: Details of the subscription
+      properties:
+        id:
+          type: string
+          description: A unique and immutable identifier for the subscription. If not provided, it is autogenerated.(max 100 chars)
+          example: dd
+        billing_period:
+          type: integer
+          example: 1
+        billing_period_unit:
+          type: string
+          enum:
+            - month
+            - weekly
+            - yearly
+          description: frequency of billing
+          example: month
+        customer_id:
+          type: string
+          description: Identifier of the customer with whom this subscription is associated.(Max Chars 50)
+          example: B8NfaRSzxtBnsFR
+        status:
+          type: string
+          enum:
+            - future
+            - in_trial
+            - active
+            - non-renewing
+            - paused
+            - cancelled
+          description: Current state of the subscription.
+          example: active
+        current_term_start:
+          type: timestamp(UTC) in seconds
+          description: Start of the current billing period of the subscription.
+          example: 1647176400
+        current_term_end:
+          type: timestamp(UTC) in seconds
+          description: End of the current billing period of the subscription. Subscription is renewed immediately after this.
+          example: 1648731599
+        next_billing_at:
+          type: timestamp(UTC) in seconds
+          description: The date/time at which the next billing for the subscription happens. This is usually right after current_term_end unless multiple subscription terms were invoiced in advance using the terms_to_charge parameter
+          example: 1648731600
+        created_at:
+          type: timestamp(UTC) in seconds
+          description: The time at which the subscription was created.
+          example: 1647214303
+        started_at:
+          type: timestamp(UTC) in seconds
+          description: Time at which the subscription was started. Is null for futuresubscriptions as it is yet to be started.
+          example: 1647176400
+        activated_at:
+          type: timestamp(UTC) in seconds
+          description: Time at which the subscription status last changed to  active. For example, this value is updated when an in_trial or  cancelled subscription activates.
+          example: 1647176400
+        updated_at:
+          type: timestamp(UTC) in seconds
+          description: Timestamp indicating when the item was last updated.
+          example: 1647214303
+        has_scheduled_changes:
+          type: boolean
+          description: If true, there are subscription changes scheduled on next renewal. (default= false)
+          example: false
+        channel:
+          type: string
+          example: web
+        resource_version:
+          type: long
+          description: Version number of this resource. Each update of this resource results in incremental change of this number. This attribute will be present only if the resource has been updated after 2016-09-28.
+          example: 1647214303096
+        deleted:
+          type: long
+          description: Indicates that the subscription has been deleted.
+          example: false
+        object:
+          type: string
+          example: subscription
+        currency_code:
+          type: string
+          description: The currency code (ISO 4217 format) of the subscription. (Max 3 characters)
+          example: AUD
+        due_invoices_count:
+          type: integer
+          description: Total number of invoices that are due for payment against the subscription.
+          example: 0
+        mrr:
+          type: in cents
+          description: Monthly recurring revenue for the subscription. Updated asynchronously, this value catches up with changes to the subscription in less than a minute. The value depends on the type of currency.(Min 1)
+          example: 0
+        cf_created_from:
+          type: string
+          enum:
+            - Buy Now Form
+            - Manual
+            - Partner Change
+          description: Type of CF form Created field.
+          example: Buy Now Form
+        override_relationship:
+          type: boolean
+          description: If true, ignores the hierarchy relationship and uses customer as payment and invoice owner.
+          example: false
+        create_pending_invoices:
+          type: boolean
+          description: Indicates whether the invoices for this subscription are generated with a pending status. This attribute is set to true automatically when the subscription has item prices that belong to metered items.
+          example: false
+        auto_close_invoices:
+          type: boolean
+          example: false
+    Customer:
+      description: Details of the customer
+      properties:
+        id:
+          type: string
+          description: ChargeBee Id of the customer
+          example: B8NfaRSzxtBnsFR
+        first_name:
+          type: string
+          description: The First Name of the customer
+          example: Hello2
+        email:
+          type: string
+          description: The email address
+          example: hello2@abc.com
+        company:
+          type: string
+          description: The company name.
+          example: Hello2 Corp
+        auto_collection:
+          type: string
+          enum:
+            - on
+            - off
+          description: Defines whether payments need to be collected automatically for this subscription. Overrides customer's auto-collection property.
+          example: "on"
+        net_term_days:
+          type: integer
+          description: Net D is the number of days within which any invoice raised for the subscription must be paid. When an invoice is raised, and this value is unavailable, the net_term_days defined at the customer level is considered.
+          example: 0
+        allow_direct_debit:
+          type: boolean
+          description: automatic deduction of payment
+          example: false
+        created_at:
+          type: timestamp (UTC) in seconds
+          description: Timestamp when customer is created
+          example: 1647175656
+        taxability:
+          type: string
+          enum:
+            - Taxable
+            - Exempt
+          description: pecifies if the customer is liable for tax.
+          example: taxable
+        updated_at:
+          type: Timestamp (UTC) in seconds
+          description: Timestamp indicating when this customer was last updated.
+          example: 1647214303
+        pii_cleared:
+          type: string
+          enum:
+            - active
+            - ScheduledForClear
+            - Clear
+          description: Indicates whether this customer's personal information has been cleared
+          example: active
+        channel:
+          type: string
+          description: medium from customer is created. Auto generated.
+          example: web
+        resource_version:
+          type: long
+          description: Version number of this resource. Each update of this resource results in incremental change of this number. This attribute will be present only if the resource has been updated after 2016-09-28.
+          example: 1647214303103
+        deleted:
+          type: boolean
+          description: Indicates that this resource has been deleted.
+          example: false
+        object:
+          type: string
+          description:
+          example: customer
+    BillingAddress:
+      description: Details of the customer
+      properties:
+        first_name:
+          type: string
+          description: The first name of the billing contact. (max chars 150)
+          example: Sumit
+        last_name:
+          type: string
+          description: The last name of the billing contact. (max chars 150)
+          example: Garg
+        line1:
+          type: string
+          description: Address line 1.
+          example: 1 bit st
+        city:
+          type: string
+          description: The name of the city.
+          example: Sydney
+        state:
+          type: string
+          description: The state/province name. Is set by Chargebee automatically for US, Canada and India If state_code is provided.
+          example: NSW
+        country:
+          type: string
+          description: The billing address country of the customer. Must be one of ISO 3166 alpha-2 country code.
+          example: AU
+        zip:
+          type: string
+          description: Zip or postal code.
+          example: "2000"
+        validation_status:
+          type: string
+          enum:
+            - not_validated
+            - valid
+            - partially_valid
+            - invalid
+          description: The address verification status.
+          example: not_validated
+        object:
+          type: string
+          description:
+          example: billing_address
+      required:
+        - first_name
+        - last_name
+        - line1
+        - state
+        - city
+        - country
+        - zip
+    SubscriptionCreated:
+      type: object
+      properties:
+        id:
+          type: string
+          description: subscription Id in chargeBee
+          example: ev_B8NfaRT00VLb7L1
+        occurred_at:
+          type: Timestamp (UTC) in seconds
+          description: Timestamp at which the even happended
+          example: 1647214303
+        source:
+          type: string
+          description: source from where it is generated
+          example: admin_console
+        user:
+          type: string
+          description: logged in user who triggered the event
+          example: Sumit.Garg@wiise.com
+        object:
+          type: string
+          description: Type of object
+          example: event
+        api_version:
+          type: string
+          description: the version of chargeBee Api called
+          example: v2
+        content:
+          properties:
+            subscription:
+              allOf:
+                - $ref: "#/components/schemas/Subscription"
+              properties:
+                subscription_items:
+                  allOf:
+                    - $ref: "#/components/schemas/SubscriptionItem"
+            customer:
+              allOf:
+                - $ref: "#/components/schemas/Customer"
+              properties:
+                billing_addresses:
+                  allOf:
+                    - $ref: "#/components/schemas/BillingAddress"
+          event_type:
+            example: "subscription_created"
+  requestBodies:
+    SubscrptionCreate:
+      content:
+        application/json:
+          schema:
+            allOf:
+              - description: Adding a new Business License
+                title: Pettie
+              - $ref: "#/components/schemas/SubscriptionCreated"
+      description: JSON for subscription that is released by ChargeBee upon Subscription Creation for a customer.
+      required: true
