@@ -168,7 +168,7 @@ paths:
       requestBody:
         $ref: "#/components/requestBodies/SubscrptionCreate"
   "/RegisterWiise":
-    $ref: "./productApi.yaml#/paths"
+    $ref: "https://raw.githubusercontent.com/sumitgarg9604/ReactRapidoc/main/productAPI.yaml#/paths"
   "/current.json":
     parameters:
       - name: key
