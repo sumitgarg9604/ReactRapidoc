@@ -1,0 +1,373 @@
+openapi: 3.0.0
+servers:
+  - url: http://api.weatherapi.com/v1
+    description: Default server
+  # To add another server
+  # - url: https://petstore.swagger.io/sandbox
+  #   description: Sandbox server
+info:
+  title: ChargeBee Integration with CSP
+  version: 1.0.0
+  description: >
+    # Introduction
+
+    Petstore illustrate the typical design decisions and tradeoffs a developer makes when building an enterprise application. 
+    The demo shows how to document REST API services **OpenAPI format** and is based on
+    [Petstore sample](http://petstore.swagger.io/) by [swagger.io](http://swagger.io) team.
+    It was further **extended** by [ReDoc](https://github.com/Redocly/redoc) Team.
+
+    ## Webhook Categories
+
+    The Webhook are divided in 3 separate categories, to make things easy to discover. 
+
+    Below is how these APIs are arranged
+
+      - Subscription Created
+      - Subscription Changed
+      - Subscription Cancel
+
+    ## API Operations
+      
+    Below is the list of supported operations
+
+      - Update an existing pet
+      - Add a new pet to the store
+      - Find Pet by ID
+      - Updates a pet in the store
+      - Deletes a pet
+      - Upload an pet image
+      - Finds Pets by status
+      - Finds Pets by tags
+
+    ### Store Operations
+
+    Below is the list of supported operations
+
+      - Get pet inventory by status
+      - Place an order for a pet
+      - Find purchase order by ID
+      - Delete purchase order
+
+    ### User Operations
+
+    Below is the list of supported operations
+
+      - Create User
+      - Login and Logout of user
+      - Get user by user name
+      - Update user
+      - Delete user
+
+    # Example
+
+    Below is a small code sample how to sender this OpenAPI spec using RapiDoc
+
+    ```html
+      <!doctype html> <!-- Important: must specify -->
+      <html>
+      <head>
+        <meta charset="utf-8"> <!-- Important: rapi-doc uses utf8 characters -->
+        <script type="module" src="https://unpkg.com/rapidoc/dist/rapidoc-min.js"></script>
+      </head>
+      <body>
+        <rapi-doc 
+          spec-url = "https://petstore.swagger.io/v2/swagger.json" 
+        > </rapi-doc>
+      </body> 
+      </html>
+    ```
+
+    # OpenAPI Version
+
+    You can find the version of OpenAPI spec from the `version` object
+
+    ```yaml
+      openapi: 3.0.2
+      info:
+        version: '1.0'
+        title: Server Variables
+      ...  
+    ```
+
+    # Authentication
+
+    Petstore offers two forms of authentication:
+      
+      - API Key
+      - OAuth2
+
+    OAuth2 - an open protocol to allow secure authorization in a simple
+    and standard method from web, mobile and desktop applications.
+externalDocs:
+  description: Find out how to create Github repo for your OpenAPI spec.
+  url: "https://github.com/Rebilly/generator-openapi-repo"
+tags:
+  - name: ChargeBee Webhook
+    description: Operations to trigger on event execution of Subscription
+
+paths:
+  "/current.json":
+    parameters:
+      - name: key
+        in: header
+        value: "cbd44cebc7c84cf19c404509222003"
+        schema:
+          type: string
+        explode: false
+      - name: q
+        in: query
+        value: "Paris"
+        schema:
+          type: string
+        explode: false
+      - name: aqi
+        in: header
+        value: "no"
+        schema:
+          type: string
+        explode: false
+      # - name: Access-Control-Allow-Origin
+      #   in: header
+      #   value: "*"
+      #   schema:
+      #     type: string
+      #   explode: false
+      # - name: Access-Control-Allow-Methods
+      #   in: header
+      #   value: "*"
+      #   schema:
+      #     type: string
+      #   explode: false
+      # - name: Access-Control-Allow-Headers
+      #   in: header
+      #   value: "*"
+      #   schema:
+      #     type: string
+      #   explode: false
+    post:
+      tags:
+        - ChargeBee Webhook
+      summary: Adds a new subscription licence to CSP
+      description: Creates a new customer in CSP if not exists and adds the subscription if not exists in CSP.
+      operationId: addPet
+      responses:
+        "200":
+          description: Success
+      x-code-samples:
+        - lang: "HTTP"
+          label: "HTTP Request"
+          source: |
+            POST /SubscritionCreated HTTP/1.1
+            Host: https://web.wiise.live/SubscriptionCreated
+            Content-Type: application/json; charset=utf-8
+            Content-Length: 137
+
+            {
+              "status": "ok",
+              "extended": true,
+              "results": [
+                {"value": 0, "type": "int64"},
+                {"value": 1.0e+3, "type": "decimal"}
+              ]
+            }
+        - lang: .Net
+          label: ".Net"
+          source: |
+            private String createPet() throws JsonProcessingException {
+              Pet pet = new Pet();
+              pet.setId(1l);
+              pet.setName("Wuffy");
+              Category category = new Category(1l, "Hund");
+              pet.setCategory(category);
+              return new ObjectMapper().writeValueAsString(pet);
+            }
+      requestBody:
+        # $ref: "#/components/requestBodies/SubscrptionCreate"
+
+components:
+  schemas:
+    SubscriptionItem:
+      description: Item existing in ChargeBee Subscription.
+      type: object
+      properties:
+        item_price_id:
+          type: string
+          description: The unique identifier of the item price (Maximum 100 chars)
+          example: 794828BF-8343-4B15-9F49-0EB87711A6A3
+        item_type:
+          type: string
+          description: OfferID of Licence
+          example: plan
+        quantity:
+          type: int
+          description: The quantity of the item purchased (Min = 1)
+          example: 1
+        unit_price:
+          type: int
+          description: Sub Item Plan Unit Amount for create subscription. (in cents min = 0)
+          example: 11900
+        amount:
+          type: int
+          description: Total amount
+          example: 11900
+        free_quantity:
+          type: int
+          description: OfferID of Licence
+          example: 0
+        object:
+          type: string
+          description: OfferID of Licence
+          example: "subscription_item"
+      required: item_price_id
+    Subscription:
+      description: Details of the subscription
+      properties:
+        id:
+          type: string
+          description: A unique and immutable identifier for the subscription. If not provided, it is autogenerated.(max 100 chars)
+          example: dd
+        billing_period:
+          example: 1
+        billing_period_unit:
+          example: month
+        customer_id:
+          example: B8NfaRSzxtBnsFR
+        status:
+          example: active
+        current_term_start:
+          example: 1647176400
+        current_term_end:
+          example: 1648731599
+        next_billing_at:
+          example: 1648731600
+        created_at:
+          example: 1647214303
+        started_at:
+          example: 1647176400
+        activated_at:
+          example: 1647176400
+        updated_at:
+          example: 1647214303
+        has_scheduled_changes:
+          example: false
+        channel:
+          example: web
+        resource_version:
+          example: 1647214303096
+        deleted:
+          example: false
+        object:
+          example: subscription
+        currency_code:
+          example: AUD
+        due_invoices_count:
+          example: 0
+        mrr:
+          example: 0
+        cf_created_from:
+          example: Buy Now Form
+        override_relationship:
+          example: false
+        create_pending_invoices:
+          example: false
+        auto_close_invoices:
+          example: false
+    Customer:
+      description: Details of the customer
+      properties:
+        id:
+          example: B8NfaRSzxtBnsFR
+        first_name:
+          example: Hello2
+        email:
+          example: hello2@abc.com
+        company:
+          example: Hello2 Corp
+        auto_collection:
+          example: "on"
+        net_term_days:
+          example: 0
+        allow_direct_debit:
+          example: false
+        created_at:
+          example: 1647175656
+        taxability:
+          example: taxable
+        updated_at:
+          example: 1647214303
+        pii_cleared:
+          example: active
+        channel:
+          example: web
+        resource_version:
+          example: 1647214303103
+        deleted:
+          example: false
+        object:
+          example: customer
+    BillingAddress:
+      description: Details of the customer
+      properties:
+        first_name:
+          example: Sumit
+        last_name:
+          example: Garg
+        line1:
+          example: 1 bit st
+        city:
+          example: Sydney
+        state:
+          example: NSW
+        country:
+          example: AU
+        zip:
+          example: "2000"
+        validation_status:
+          example: not_validated
+        object:
+          example: billing_address
+    SubscriptionCreated:
+      type: object
+      properties:
+        id:
+          type: string
+          example: ev_B8NfaRT00VLb7L1
+        occurred_at:
+          example: 1647214303
+        source:
+          example: admin_console
+        user:
+          example: Sumit.Garg@wiise.com
+        object:
+          example: event
+        api_version:
+          example: v2
+        content:
+          properties:
+            subscription:
+              allOf:
+                - $ref: "#/components/schemas/Subscription"
+              properties:
+                subscription_items:
+                  allOf:
+                    - $ref: "#/components/schemas/SubscriptionItem"
+            customer:
+              allOf:
+                - $ref: "#/components/schemas/Customer"
+              properties:
+                billing_addresses:
+                  allOf:
+                    - $ref: "#/components/schemas/BillingAddress"
+          event_type:
+            example: "subscription_created"
+  requestBodies:
+    SubscrptionCreate:
+      content:
+        application/json:
+          schema:
+            allOf:
+              - description: Adding a new Business License
+                title: Pettie
+              - $ref: "#/components/schemas/SubscriptionCreated"
+      description: JSON for subscription that is released by ChargeBee upon Subscription Creation for a customer.
+      required: true
